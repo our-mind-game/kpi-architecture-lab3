@@ -9,6 +9,12 @@ import (
 	"strings"
 )
 
+var (
+	InvalidOperationError = errors.New("invalid operation specified")
+	InvalidParameterError = errors.New("invalid parameter specified")
+	NotAllParametersError = errors.New("not all parameters specified")
+)
+
 // Parser уміє прочитати дані з вхідного io.Reader та повернути список операцій представлені вхідним скриптом.
 type Parser struct {
 }
@@ -63,7 +69,7 @@ func parseLine(lineOp string) (painter.Operation, error) {
 	case "reset":
 		return painter.OperationFunc(painter.Clear), nil
 	}
-	return nil, errors.New("invalid operation specified")
+	return nil, InvalidOperationError
 }
 
 func getOperationFields(operation string) (string, []int, error) {
@@ -74,7 +80,7 @@ func getOperationFields(operation string) (string, []int, error) {
 	for _, field := range fields[1:] {
 		res, err := strconv.ParseFloat(field, 32)
 		if err != nil {
-			return "", nil, errors.New("invalid parameter specified")
+			return "", nil, InvalidParameterError
 		}
 		parameters = append(parameters, int(res))
 	}
@@ -82,11 +88,11 @@ func getOperationFields(operation string) (string, []int, error) {
 	switch command {
 	case "bgrect":
 		if len(parameters) < 4 {
-			return "", nil, errors.New("not all parameters specified")
+			return "", nil, NotAllParametersError
 		}
 	case "figure", "move":
 		if len(parameters) < 2 {
-			return "", nil, errors.New("not all parameters specified")
+			return "", nil, NotAllParametersError
 		}
 	}
 
