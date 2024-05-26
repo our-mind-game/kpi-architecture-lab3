@@ -79,7 +79,7 @@ func GreenFill(t screen.Texture) {
 	state.backgroundColor = color.RGBA{G: 0xff, A: 0xff}
 }
 
-// Clear очищує текстуру та зафарбовує у чорний колір. Може бути викоистана як Operation через OperationFunc(Reset)
+// Clear очищує текстуру та зафарбовує у чорний колір. Може бути викоистана як Operation через OperationFunc(Clear)
 func Clear(t screen.Texture) {
 	state.backgroundColor = color.Black
 	state.hasRect = false
