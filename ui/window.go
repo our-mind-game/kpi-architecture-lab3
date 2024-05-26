@@ -1,11 +1,12 @@
 package ui
 
 import (
+	"fmt"
+	"golang.org/x/exp/shiny/driver"
 	"image"
 	"image/color"
 	"log"
 
-	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/imageutil"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/image/draw"
@@ -14,6 +15,11 @@ import (
 	"golang.org/x/mobile/event/mouse"
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
+)
+
+const (
+	WIDTH  = 800
+	HEIGHT = 800
 )
 
 type Visualizer struct {
@@ -25,8 +31,9 @@ type Visualizer struct {
 	tx   chan screen.Texture
 	done chan struct{}
 
-	sz  size.Event
-	pos image.Rectangle
+	sz        size.Event
+	pos       image.Rectangle
+	mouseCord image.Point
 }
 
 func (pw *Visualizer) Main() {
@@ -34,6 +41,7 @@ func (pw *Visualizer) Main() {
 	pw.done = make(chan struct{})
 	pw.pos.Max.X = 200
 	pw.pos.Max.Y = 200
+	pw.mouseCord = image.Point{X: WIDTH / 2, Y: HEIGHT / 2}
 	driver.Main(pw.run)
 }
 
@@ -43,7 +51,9 @@ func (pw *Visualizer) Update(t screen.Texture) {
 
 func (pw *Visualizer) run(s screen.Screen) {
 	w, err := s.NewWindow(&screen.NewWindowOptions{
-		Title: pw.Title,
+		Title:  pw.Title,
+		Width:  WIDTH,
+		Height: HEIGHT,
 	})
 	if err != nil {
 		log.Fatal("Failed to initialize the app window:", err)
@@ -116,6 +126,14 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 	case mouse.Event:
 		if t == nil {
 			// TODO: Реалізувати реакцію на натискання кнопки миші.
+			if e.Button == mouse.ButtonLeft && e.Direction == mouse.DirPress {
+				pw.mouseCord = image.Point{
+					X: int(e.X),
+					Y: int(e.Y),
+				}
+				pw.w.Send(paint.Event{})
+				fmt.Printf("Mouse event triggered on coordinates: x=%d, y=%d\n", int(e.X), int(e.Y))
+			}
 		}
 
 	case paint.Event:
@@ -133,7 +151,11 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 func (pw *Visualizer) drawDefaultUI() {
 	pw.w.Fill(pw.sz.Bounds(), color.Black, draw.Src) // Фон.
 
-	// TODO: Змінити колір фону та додати відображення фігури у вашому варіанті.
+	X, Y := pw.mouseCord.X, pw.mouseCord.Y
+	figureColor := color.RGBA{R: 255, G: 30, B: 30, A: 1}
+
+	pw.w.Fill(image.Rect(X-200, Y+70, X+200, Y-70), figureColor, draw.Src)
+	pw.w.Fill(image.Rect(X-70, Y+200, X+70, Y-200), figureColor, draw.Src)
 
 	// Малювання білої рамки.
 	for _, br := range imageutil.Border(pw.sz.Bounds(), 10) {
