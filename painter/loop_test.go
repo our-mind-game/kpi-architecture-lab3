@@ -22,7 +22,7 @@ func TestLoop_Post(t *testing.T) {
 	l.Start(mockScreen{})
 	l.Post(logOp(t, "do white fill", WhiteFill))
 	l.Post(logOp(t, "do green fill", GreenFill))
-	l.Post(UpdateOp)
+	l.Post(UpdateOp{})
 
 	for i := 0; i < 3; i++ {
 		go l.Post(logOp(t, "do green fill", GreenFill))
