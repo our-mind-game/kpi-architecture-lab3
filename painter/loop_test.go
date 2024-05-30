@@ -72,12 +72,12 @@ func TestLoop_Post(t *testing.T) {
 		testOps = append(testOps, "firstCommand")
 
 		l.Post(OperationFunc(func(t screen.Texture) {
-			testOps = append(testOps, "secondCommand")
+			testOps = append(testOps, "thirdCommand")
 		}))
 	}))
 
 	l.Post(OperationFunc(func(t screen.Texture) {
-		testOps = append(testOps, "thirdCommand")
+		testOps = append(testOps, "secondCommand")
 	}))
 
 	l.StopAndWait()
